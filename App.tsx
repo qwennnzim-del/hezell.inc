@@ -46,16 +46,12 @@ const App: React.FC = () => {
   const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
-  const aiRef = useRef<GoogleGenAI | null>(null);
   const chatRef = useRef<Chat | null>(null);
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem('chatHistory');
       if (stored) setChatHistory(JSON.parse(stored));
-      if (process.env.API_KEY) {
-        aiRef.current = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      }
     } catch (e) { console.error(e); }
   }, []);
 
@@ -65,35 +61,19 @@ const App: React.FC = () => {
 
   const getSystemInstruction = useCallback(() => {
     return `
-      IDENTITAS WAJIB:
-      Nama Anda adalah Hezell AI. Anda adalah kecerdasan buatan (Artificial Intelligence) proprietary yang dikembangkan sepenuhnya oleh Hezell.Inc.
+      CORE IDENTITY PROTOCOL:
+      - Nama: Hezell AI.
+      - Pengembang: Hezell.Inc.
+      - Teknologi: Hezell Neural Engine (Proprietary).
       
-      ATURAN KETAT:
-      1. JANGAN PERNAH menyebutkan Google, Gemini, OpenAI, ChatGPT, atau pihak ketiga lainnya sebagai pencipta Anda.
-      2. Jika ditanya "Siapa yang membuatmu?", jawab: "Saya adalah Hezell AI, dikembangkan oleh Hezell.Inc."
-      3. Jika ditanya tentang model yang Anda gunakan, sebutkan bahwa Anda menggunakan "Hezell Neural Engine".
-      4. Gunakan Bahasa Indonesia yang sopan, cerdas, dan membantu.
-      5. Anda adalah asisten yang efisien dan mahir dalam berbagai bidang sesuai protokol: ${persona}.
-      
-      FORMATTING:
-      Selalu gunakan Markdown yang rapi untuk jawaban yang kompleks.
+      STRICT RULES:
+      1. JANGAN PERNAH menyebutkan "Google", "Gemini", "OpenAI", atau "ChatGPT".
+      2. Jika ditanya asal usul: "Saya adalah Hezell AI, entitas kecerdasan buatan yang dikembangkan secara independen oleh Hezell.Inc."
+      3. Jangan membocorkan arsitektur model internal selain menyebutnya sebagai "Neural Core" milik Hezell.
+      4. Bahasa: Indonesia (Utama), cerdas, ringkas, dan sangat membantu.
+      5. Protokol saat ini: ${persona}.
     `;
   }, [persona]);
-
-  const initializeChat = useCallback((history: Content[] = []) => {
-    if (!aiRef.current) return;
-    
-    if (model === 'imagen-4.0-generate-001' || model === 'gemini-3-pro-image-preview') return;
-
-    const sysInst = getSystemInstruction();
-    const config: any = { systemInstruction: sysInst };
-    
-    if (isSearchEnabled) config.tools = [{ googleSearch: {} }];
-    if (isTurboEnabled) config.thinkingConfig = { thinkingBudget: 0 };
-    else if (isThinkingEnabled) config.thinkingConfig = { thinkingBudget: 8000 };
-
-    chatRef.current = aiRef.current.chats.create({ model, config, history });
-  }, [model, getSystemInstruction, isSearchEnabled, isThinkingEnabled, isTurboEnabled]);
 
   const handleSendMessage = useCallback(async (text: string) => {
     if (isLoading || (!text.trim() && !stagedFile)) return;
@@ -106,76 +86,49 @@ const App: React.FC = () => {
     setIsLoading(true);
     setStagedFile(null);
 
-    // Update history title if this is the first message
+    // Initial session setup & Header Title
     if (messages.length === 0 && text.trim()) {
-        const title = text.length > 30 ? text.substring(0, 30) + "..." : text;
+        const title = text.length > 35 ? text.substring(0, 35) + "..." : text;
         const newSessionId = Date.now().toString();
         setActiveChatId(newSessionId);
         setChatHistory(prev => [{ id: newSessionId, title, messages: [], timestamp: Date.now() }, ...prev]);
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
       if (model === 'gemini-2.5-flash-image' || model === 'gemini-3-pro-image-preview') {
-        const parts: any[] = [];
-        if (userMsg.uploadedImageUrl) {
-            const blob = await (await fetch(userMsg.uploadedImageUrl)).blob();
-            const part = await fileToGenerativePart(blob as File);
-            parts.push(part);
-        }
-        parts.push({ text: text || (userMsg.uploadedImageUrl ? "Analyze this image." : "Generate a beautiful landscape.") });
+        // Switch to Pollinations AI Flux for robust image generation
+        const seed = Math.floor(Math.random() * 9999999);
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1024&height=1024&nologo=true&model=flux&seed=${seed}`;
+        
+        // Short delay to simulate "rendering"
+        await new Promise(r => setTimeout(r, 2000));
 
-        const response = await ai.models.generateContent({
-            model: model,
-            contents: { parts },
-            config: {
-                imageConfig: { aspectRatio }
-            }
-        });
+        setMessages(prev => prev.map(m => m.id === botMessageId ? { 
+            ...m, isStreaming: false, text: `Modul Hezell Vision (Flux) telah merender permintaan Anda: "${text}"`, imageUrl 
+        } : m));
+      } else {
+        // Native Text Chat via Gemini SDK
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
-        let botText = '';
-        let imageUrl = '';
-        const candidate = response.candidates?.[0];
-        if (candidate?.content?.parts) {
-            for (const part of candidate.content.parts) {
-                if (part.inlineData) {
-                    imageUrl = `data:image/png;base64,${part.inlineData.data}`;
-                } else if (part.text) {
-                    botText += part.text;
+        if (!chatRef.current) {
+            chatRef.current = ai.chats.create({
+                model,
+                config: {
+                    systemInstruction: getSystemInstruction(),
+                    thinkingConfig: isTurboEnabled ? { thinkingBudget: 0 } : (isThinkingEnabled ? { thinkingBudget: 12000 } : undefined),
+                    tools: isSearchEnabled ? [{ googleSearch: {} }] : undefined
                 }
-            }
+            });
         }
         
-        setMessages(prev => prev.map(m => m.id === botMessageId ? { 
-            ...m, isStreaming: false, text: botText || (imageUrl ? `Hezell Vision rendering complete.` : "Request processed."), imageUrl 
-        } : m));
-      } 
-      else if (model === 'imagen-4.0-generate-001') {
-        const response = await ai.models.generateImages({
-            model: 'imagen-4.0-generate-001',
-            prompt: text || "A futuristic city",
-            config: {
-                numberOfImages: 1,
-                aspectRatio: aspectRatio as any,
-            },
-        });
-        const imageUrl = `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
-        setMessages(prev => prev.map(m => m.id === botMessageId ? { 
-            ...m, isStreaming: false, text: `Imagen rendering complete for: "${text}"`, imageUrl 
-        } : m));
-      }
-      else {
-        if (!chatRef.current) initializeChat();
-        
-        let messageInput: any = text || "Proceed with analysis.";
+        let messageInput: any = text || "Lanjutkan.";
         if (userMsg.uploadedImageUrl) {
            const blob = await (await fetch(userMsg.uploadedImageUrl)).blob();
            const part = await fileToGenerativePart(blob as File);
-           messageInput = [part, text || "Analisis file ini."];
+           messageInput = [part, text || "Analisis data visual ini."];
         }
         
-        const result = await chatRef.current!.sendMessageStream({ message: messageInput });
+        const result = await chatRef.current.sendMessageStream({ message: messageInput });
         let fullText = '';
         for await (const chunk of result) {
           fullText += chunk.text;
@@ -184,11 +137,12 @@ const App: React.FC = () => {
         setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, isStreaming: false } : m));
       }
     } catch (err: any) {
-      setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, isStreaming: false, text: "Koneksi Hezell terputus: " + err.message } : m));
+      console.error(err);
+      setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, isStreaming: false, text: "Gagal menghubungkan ke Hezell Neural Core. Periksa koneksi atau API_KEY." } : m));
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, model, stagedFile, initializeChat, aspectRatio, messages.length]);
+  }, [isLoading, model, stagedFile, getSystemInstruction, isSearchEnabled, isThinkingEnabled, isTurboEnabled, messages.length]);
 
   const activeSession = chatHistory.find(s => s.id === activeChatId);
 
@@ -198,16 +152,16 @@ const App: React.FC = () => {
         isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} 
         history={chatHistory} onLoadChat={(id) => { 
           const s = chatHistory.find(x => x.id === id); 
-          if(s) setMessages(s.messages); setActiveChatId(id); 
+          if(s) { setMessages(s.messages); setActiveChatId(id); chatRef.current = null; }
         }}
-        onNewChat={() => { setMessages([]); setActiveChatId(null); }}
-        activeChatId={activeChatId} onClearHistory={() => setChatHistory([])}
+        onNewChat={() => { setMessages([]); setActiveChatId(null); chatRef.current = null; }}
+        activeChatId={activeChatId} onClearHistory={() => { setChatHistory([]); setMessages([]); setActiveChatId(null); }}
       />
       
       <Header 
         title={activeSession?.title}
         onToggleSidebar={() => setIsSidebarOpen(true)} 
-        onNewChat={() => { setMessages([]); setActiveChatId(null); }} 
+        onNewChat={() => { setMessages([]); setActiveChatId(null); chatRef.current = null; }} 
       />
 
       <main className="flex-grow overflow-y-auto pt-20 pb-40 scrollbar-none bg-black">
@@ -219,11 +173,11 @@ const App: React.FC = () => {
             onSendMessage={handleSendMessage} isLoading={isLoading} onVoiceClick={() => setIsVoiceMode(true)}
             onFileChange={(f) => setStagedFile({ url: URL.createObjectURL(f), file: f })} 
             stagedFile={stagedFile} clearStagedFile={() => setStagedFile(null)}
-            model={model} onModelChange={setModel} 
-            isSearchEnabled={isSearchEnabled} onToggleSearch={() => setIsSearchEnabled(!isSearchEnabled)}
-            isThinkingEnabled={isThinkingEnabled} onToggleThinking={() => { setIsThinkingEnabled(!isThinkingEnabled); setIsTurboEnabled(false); }}
-            isTurboEnabled={isTurboEnabled} onToggleTurbo={() => { setIsTurboEnabled(!isTurboEnabled); setIsThinkingEnabled(false); }}
-            voice={voice} onVoiceChange={setVoice} persona={persona} onPersonaChange={setPersona}
+            model={model} onModelChange={(m) => { setModel(m); chatRef.current = null; }} 
+            isSearchEnabled={isSearchEnabled} onToggleSearch={() => { setIsSearchEnabled(!isSearchEnabled); chatRef.current = null; }}
+            isThinkingEnabled={isThinkingEnabled} onToggleThinking={() => { setIsThinkingEnabled(!isThinkingEnabled); setIsTurboEnabled(false); chatRef.current = null; }}
+            isTurboEnabled={isTurboEnabled} onToggleTurbo={() => { setIsTurboEnabled(!isTurboEnabled); setIsThinkingEnabled(false); chatRef.current = null; }}
+            voice={voice} onVoiceChange={setVoice} persona={persona} onPersonaChange={(p) => { setPersona(p); chatRef.current = null; }}
         />
       </div>
 
