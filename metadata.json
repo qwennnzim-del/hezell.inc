@@ -1,0 +1,8 @@
+{
+  "name": "Hezell.Space",
+  "description": "An AI-powered assistant named Hezell, featuring advanced reasoning and multimodal capabilities.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}
