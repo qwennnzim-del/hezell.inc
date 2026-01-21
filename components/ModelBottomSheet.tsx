@@ -12,11 +12,10 @@ interface ModelBottomSheetProps {
 
 const ModelBottomSheet: React.FC<ModelBottomSheetProps> = ({ isOpen, onClose, model, onModelChange }) => {
   const modelOptions: { id: ModelType; name: string; description: string; tag: string }[] = [
-    { id: 'gemini-2.5-flash', name: 'Hezell Flash 2.5', description: 'Standard Speed & Efficiency. Best for daily tasks.', tag: 'BALANCED' },
-    { id: 'gemini-flash-lite-latest', name: 'Hezell Lite 2.5', description: 'Ultra-fast & Lightweight. Instant responses.', tag: 'FASTEST' },
-    { id: 'gemini-3-pro-preview', name: 'Hezell Pro 3.0', description: 'High-Reasoning & Logic. Best for Math/Code.', tag: 'SMARTEST' },
-    { id: 'gemini-2.5-flash-image', name: 'Hezell Image', description: 'Generation & Editing. Single unified visual engine.', tag: 'VISUAL' },
-    { id: 'gemini-1.5-flash', name: 'Hezell Flash 1.5', description: 'Legacy stable model.', tag: 'LEGACY' },
+    { id: 'gemini-2.5-flash', name: 'Hezell Flash 2.5', description: 'Cepat, cerdas, & stabil. Pilihan terbaik harian.', tag: 'RECOMMENDED' },
+    { id: 'gemini-flash-lite-latest', name: 'Hezell Lite 2.0', description: 'Paling ringan & hemat kuota. Respon instan.', tag: 'STABLE' },
+    { id: 'gemini-3-pro-preview', name: 'Hezell Pro 3.0', description: 'Logika tinggi. (Mungkin butuh akun berbayar/Limit).', tag: 'HIGH USAGE' },
+    { id: 'gemini-2.5-flash-image', name: 'Hezell Image', description: 'Membuat gambar AI. (Perlu Billing Aktif).', tag: 'PAID' },
   ];
 
   return (
@@ -34,8 +33,8 @@ const ModelBottomSheet: React.FC<ModelBottomSheetProps> = ({ isOpen, onClose, mo
       >
         <div className="sticky top-0 bg-[#121212]/95 backdrop-blur-md z-10 p-4 border-b border-gray-800">
             <div className="w-12 h-1.5 bg-gray-700 rounded-full mx-auto mb-4" />
-            <h2 className="text-lg font-bold text-center text-white tracking-wide">Select Neural Engine</h2>
-            <p className="text-xs text-center text-gray-400 mt-1">Choose the optimal brain for your task</p>
+            <h2 className="text-lg font-bold text-center text-white tracking-wide">Pilih Neural Engine</h2>
+            <p className="text-xs text-center text-gray-400 mt-1">Pilih otak AI yang sesuai kebutuhan Anda</p>
         </div>
 
         <div className="p-4 space-y-3 pb-8">
@@ -56,9 +55,9 @@ const ModelBottomSheet: React.FC<ModelBottomSheetProps> = ({ isOpen, onClose, mo
                                     {option.name}
                                 </span>
                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                                    option.tag === 'SMARTEST' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
-                                    option.tag === 'FASTEST' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10' :
-                                    option.tag === 'VISUAL' ? 'text-pink-400 border-pink-500/30 bg-pink-500/10' :
+                                    option.tag === 'HIGH USAGE' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
+                                    option.tag === 'STABLE' ? 'text-green-400 border-green-500/30 bg-green-500/10' :
+                                    option.tag === 'PAID' ? 'text-red-400 border-red-500/30 bg-red-500/10' :
                                     'text-blue-400 border-blue-500/30 bg-blue-500/10'
                                 }`}>
                                     {option.tag}

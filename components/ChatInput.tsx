@@ -191,8 +191,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
             </div>
         )}
 
-        {/* Inner Input Field Container - TRANSPARENT AS REQUESTED */}
-        <div className="relative flex flex-col p-1.5 bg-transparent rounded-[24px] group transition-all duration-300">
+        {/* Inner Input Field Container */}
+        <div className="relative flex flex-col p-1.5 bg-[#1E1E1E] rounded-[26px] border border-gray-700/50 group transition-all duration-300 shadow-xl">
             <textarea
               ref={textareaRef}
               rows={1}

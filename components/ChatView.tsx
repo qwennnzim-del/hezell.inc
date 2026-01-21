@@ -35,13 +35,18 @@ const WelcomeScreen: React.FC = () => (
     
     <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
       <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00c6ff] via-[#8a2be2] to-[#00eaff] animate-gradient">
-        Hezell.Space
+        Hezell AI
       </span>
     </h1>
     
     <p className="text-gray-400 text-lg md:text-xl max-w-xl leading-relaxed animate-fade-in-up">
-      Apa yang bisa saya bantu hari ini?
+      Asisten cerdas untuk berpikir, berkarya, dan berimajinasi.
     </p>
+    
+    <div className="mt-8 flex gap-2 justify-center opacity-70">
+        <span className="text-xs bg-gray-800/50 px-3 py-1 rounded-full border border-gray-700">⚡ Flash 2.5</span>
+        <span className="text-xs bg-gray-800/50 px-3 py-1 rounded-full border border-gray-700">🚀 Lite 2.0</span>
+    </div>
   </div>
 );
 
@@ -53,7 +58,7 @@ const UserMessage: React.FC<{ message: Message }> = ({ message }) => {
     return (
       <div className="flex items-start my-6 justify-end">
         <div className="max-w-xl text-right">
-          <p className="font-medium text-gray-200 text-xs mb-1 opacity-70">You</p>
+          <p className="font-medium text-gray-200 text-xs mb-1 opacity-70">Anda</p>
           
           {message.uploadedImageUrl && (
               isImage ? (

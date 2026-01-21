@@ -18,8 +18,9 @@ const Header: React.FC<HeaderProps> = ({ model, onModelChange, onToggleSidebar, 
     switch(m) {
         case 'gemini-3-pro-preview': return 'Pro 3.0';
         case 'imagen-4.0-generate-001': return 'Imagen';
-        case 'gemini-2.5-flash-image': return 'Edit';
-        default: return 'Flash';
+        case 'gemini-2.5-flash-image': return 'Image';
+        case 'gemini-flash-lite-latest': return 'Lite 2.0';
+        default: return 'Flash 2.5';
     }
   };
   
@@ -43,10 +44,10 @@ const Header: React.FC<HeaderProps> = ({ model, onModelChange, onToggleSidebar, 
   }
 
   const modelOptions: { id: ModelType; name: string; description: string }[] = [
-    { id: 'gemini-2.5-flash', name: 'Hezell Flash', description: 'Model tercepat untuk tugas sehari-hari.' },
-    { id: 'gemini-3-pro-preview', name: 'Hezell Pro 3.0', description: 'Reasoning canggih, Coding & Math.' },
-    { id: 'imagen-4.0-generate-001', name: 'Hezell Imagen', description: 'Buat gambar dari teks.' },
-    { id: 'gemini-2.5-flash-image', name: 'Hezell Edit', description: 'Unggah & edit gambar dengan AI.' },
+    { id: 'gemini-2.5-flash', name: 'Hezell Flash 2.5', description: 'Stabil & Cepat (Rekomendasi).' },
+    { id: 'gemini-flash-lite-latest', name: 'Hezell Lite 2.0', description: 'Hemat Kuota & Instan.' },
+    { id: 'gemini-3-pro-preview', name: 'Hezell Pro 3.0', description: 'Logika Tinggi (High Usage).' },
+    { id: 'gemini-2.5-flash-image', name: 'Hezell Image', description: 'Buat & Edit Gambar (Paid).' },
   ];
 
   return (
@@ -66,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({ model, onModelChange, onToggleSidebar, 
              <CusstzzLogo className="w-5 h-5" />
             <span>
               <span className="font-semibold bg-gradient-to-r from-[#00c6ff] via-[#8a2be2] to-[#00eaff] bg-clip-text text-transparent animate-gradient">
-                Hezell
+                Hezell AI
               </span>
               {' '}{modelDisplayName}
             </span>
