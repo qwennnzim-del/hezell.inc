@@ -695,14 +695,19 @@ const App: React.FC = () => {
     } catch (error: any) {
       console.error("Generation error:", error);
       
-      // Improve Error Display in UI
+      // Improve Error Display in UI - Localized for Indonesian User
       let displayError = error.message || "Unknown error occurred.";
-      if (displayError.includes('{')) {
-          try {
-             if (displayError.length > 200 && !displayError.includes("Image Generation Failed")) {
-                 displayError = "System Error: The request failed. " + (displayError.includes('429') ? "Quota exceeded." : "Please check your connection or API key.");
-             }
-          } catch (e) {}
+      let isQuotaError = false;
+
+      if (displayError.includes('429') || displayError.includes('Quota') || displayError.includes('billing')) {
+          isQuotaError = true;
+          displayError = "⚠️ **Batas Kuota Tercapai / Error Billing**\n\nModel Pro atau Image memerlukan akun berbayar atau telah mencapai batas harian. Mohon beralih ke model **Hezell Flash 2.5** atau **Hezell Lite 2.0** yang lebih stabil dan gratis.";
+      } else if (displayError.includes('SAFETY')) {
+          displayError = "⚠️ **Konten Dibatasi**\n\nPermintaan Anda terdeteksi melanggar filter keamanan AI.";
+      } else if (displayError.includes('Image Generation Failed')) {
+          displayError = "⚠️ **Gagal Membuat Gambar**\n\nFitur ini memerlukan API Key dengan billing aktif di Google Cloud.";
+      } else {
+           displayError = "⚠️ **Koneksi Gagal**\n\nTerjadi kesalahan jaringan atau API Key tidak valid.";
       }
 
       setMessages(prev => prev.map(msg => {
@@ -710,7 +715,8 @@ const App: React.FC = () => {
             return {
                 ...msg,
                 isStreaming: false,
-                text: `⚠️ **System Alert**\n\n${displayError}\n\n*Note: Advanced features like Image Generation often require a paid Google Cloud Project.*`
+                text: displayError,
+                suggestions: isQuotaError ? ["Ganti ke Flash 2.5", "Ganti ke Lite 2.0", "Coba lagi"] : undefined
             };
         }
         return msg;
