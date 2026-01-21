@@ -34,8 +34,9 @@ const ControlsBottomSheet: React.FC<ControlsBottomSheetProps> = ({
   persona,
   onPersonaChange
 }) => {
-  const isChatModel = ['gemini-2.5-flash', 'gemini-3-pro-preview', 'gemini-flash-lite-latest', 'gemini-1.5-flash'].includes(model);
-  const isThinkingSupported = ['gemini-2.5-flash', 'gemini-3-pro-preview', 'gemini-flash-lite-latest'].includes(model);
+  // Fix: Updated model lists to match valid ModelType and GenAI guidelines
+  const isChatModel = ['gemini-3-flash-preview', 'gemini-3-pro-preview', 'gemini-flash-lite-latest'].includes(model);
+  const isThinkingSupported = ['gemini-3-flash-preview', 'gemini-3-pro-preview', 'gemini-flash-lite-latest'].includes(model);
 
   const voices: { id: VoiceName; label: string; desc: string }[] = [
       { id: 'Kore', label: 'Kore', desc: 'Calm & Balanced (Default)' },

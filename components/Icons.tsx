@@ -7,7 +7,7 @@ type IconProps = {
 
 export const CusstzzLogo: React.FC<IconProps> = ({ className }) => (
   <div
-    className={`${className} bg-gradient-to-br from-[#5ce1ff] via-[#d480ff] to-[#5ce1ff] brightness-110 drop-shadow-[0_0_4px_rgba(212,128,255,0.6)]`}
+    className={`${className} bg-white brightness-100`}
     style={{
       maskImage: "url('https://img.icons8.com/?size=100&id=iN4oY7OgknqM&format=png&color=000000')",
       WebkitMaskImage: "url('https://img.icons8.com/?size=100&id=iN4oY7OgknqM&format=png&color=000000')",

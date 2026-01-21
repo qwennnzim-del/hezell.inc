@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { PlusIcon, SendIcon, VoiceIcon, CloseIcon, SparklesIcon, SpinnerIcon, FileIcon, CircleEllipsisIcon, CpuIcon } from './Icons';
+import { PlusIcon, SendIcon, VoiceIcon, CloseIcon, SparklesIcon, SpinnerIcon, FileIcon, CircleEllipsisIcon } from './Icons';
 import { ModelType, VoiceName, AgentPersona } from '../types';
 import { GoogleGenAI } from "@google/genai";
 import ControlsBottomSheet from './ControlsBottomSheet';
@@ -17,7 +17,7 @@ interface ChatInputProps {
   stagedFile: { url: string; file: File } | null;
   clearStagedFile: () => void;
   model: ModelType;
-  onModelChange: (model: ModelType) => void; // Added Prop
+  onModelChange: (model: ModelType) => void;
   isSearchEnabled: boolean;
   onToggleSearch: () => void;
   isThinkingEnabled?: boolean;
@@ -38,7 +38,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     stagedFile,
     clearStagedFile,
     model,
-    onModelChange, // Destructure
+    onModelChange,
     isSearchEnabled,
     onToggleSearch,
     isThinkingEnabled,
@@ -54,7 +54,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isEnhanced, setIsEnhanced] = useState(false);
   const [isControlsSheetOpen, setIsControlsSheetOpen] = useState(false);
-  const [isModelSheetOpen, setIsModelSheetOpen] = useState(false); // New State
+  const [isModelSheetOpen, setIsModelSheetOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -67,7 +67,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }
   }, [inputValue]);
 
-  // Reset enhanced state when user types manually
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
     if (isEnhanced) setIsEnhanced(false);
@@ -83,22 +82,27 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
+  const getModelDisplayName = (m: ModelType) => {
+    switch(m) {
+        case 'gemini-3-pro-preview': return 'Hezell Ultra';
+        case 'gemini-2.5-flash-image': return 'Hezell Vision';
+        case 'gemini-flash-lite-latest': return 'Hezell Lite';
+        default: return 'Hezell Flash';
+    }
+  };
+
   const handleEnhancePrompt = async () => {
     if (!inputValue.trim() || isEnhancing) return;
 
     setIsEnhancing(true);
     try {
-        // Updated to GEMINI_API_KEY
-        if (!process.env.GEMINI_API_KEY) throw new Error("API Key not found");
+        if (!process.env.API_KEY) throw new Error("API Key not found");
         
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        // Use Flash Lite with Zero Thinking Budget for instant enhancement
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const response = await ai.models.generateContent({
-            model: 'gemini-flash-lite-latest',
+            model: 'gemini-3-flash-preview',
             config: { thinkingConfig: { thinkingBudget: 0 } },
-            contents: `Rewrite the following user prompt to be comprehensive, detailed, and optimized for an AI Large Language Model to get the best possible result. Keep the original intent but expand on it. Do not add any preamble or conversational text, just output the enhanced prompt directly.
-            
-            User Prompt: "${inputValue}"`,
+            contents: `Rewrite prompt to be detailed and effective. Output ONLY enhanced prompt: "${inputValue}"`,
         });
 
         if (response.text) {
@@ -123,76 +127,33 @@ const ChatInput: React.FC<ChatInputProps> = ({
     fileInputRef.current?.click();
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      onFileChange(file);
-    }
-    if(fileInputRef.current) {
-        fileInputRef.current.value = '';
-    }
-  };
-
   const placeholderText = stagedFile 
-    ? "Describe the projection or ask a question..." 
-    : "Message Hezell...";
+    ? "Describe the module or ask Hezell..." 
+    : "Message Hezell AI...";
 
-  const isImage = stagedFile?.file.type.startsWith('image/');
   const hasContent = inputValue.trim().length > 0 || stagedFile !== null;
 
   return (
     <div className="relative w-full pt-1">
-      
       <div className="max-w-4xl mx-auto px-4 pt-4 pb-2">
-      
-        {/* Holographic Input Preview */}
         {stagedFile && (
-            <div className="relative self-start mb-3 group select-none overflow-hidden rounded-xl border border-blue-500/30 bg-blue-900/10 backdrop-blur-md shadow-[0_0_15px_rgba(0,198,255,0.15)] transition-all hover:shadow-[0_0_25px_rgba(0,198,255,0.3)] w-full max-w-xs animate-fade-in-up">
-                {/* Scanline Effect */}
-                <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-blue-400/10 to-transparent opacity-20 animate-[shimmer_2s_infinite]" style={{ backgroundSize: '100% 200%' }}></div>
-
-                <div className="relative z-10 flex items-center gap-4 p-3 pr-10">
-                     {isImage ? (
-                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-blue-400/30 shadow-inner">
-                            <img src={stagedFile.url} alt="Holo Preview" className="h-full w-full object-cover opacity-90" />
-                            <div className="absolute inset-0 bg-blue-500/10 mix-blend-overlay"></div>
-                        </div>
-                    ) : (
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-blue-400/30 bg-blue-900/20 text-blue-300 shadow-inner">
-                             <FileIcon className="h-6 w-6 animate-pulse" />
-                        </div>
-                    )}
-
-                    <div className="flex flex-col min-w-0">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-300 drop-shadow-[0_0_5px_rgba(147,197,253,0.5)]">
-                            {stagedFile.file.type.split('/')[1] || 'DATA'} MODULE
-                        </span>
-                        <span className="truncate text-[10px] text-blue-200/70 font-mono">
-                            {stagedFile.file.name}
-                        </span>
-                        <div className="mt-1 h-0.5 w-16 bg-blue-900/50">
-                            <div className="h-full w-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-blue-400 to-transparent"></div>
-                        </div>
-                    </div>
+            <div className="relative self-start mb-3 group select-none overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 w-full max-w-xs animate-fade-in-up">
+                <div className="flex items-center gap-3">
+                    <FileIcon className="h-5 w-5 text-gray-400" />
+                    <span className="truncate text-[10px] text-gray-300 font-mono">
+                        {stagedFile.file.name}
+                    </span>
                 </div>
-
-                <div className="absolute top-0 left-0 h-2 w-2 border-l border-t border-blue-400 opacity-60"></div>
-                <div className="absolute bottom-0 right-0 h-2 w-2 border-r border-b border-blue-400 opacity-60"></div>
-                <div className="absolute top-0 right-0 h-2 w-2 border-r border-t border-blue-400 opacity-60"></div>
-                <div className="absolute bottom-0 left-0 h-2 w-2 border-l border-b border-blue-400 opacity-60"></div>
-
                 <button
                     onClick={clearStagedFile}
-                    className="absolute top-1 right-1 p-1.5 text-blue-400 hover:text-white transition-colors z-20 hover:bg-blue-500/20 rounded-full"
-                    aria-label="Remove attachment"
+                    className="absolute top-1 right-1 p-1 text-gray-400 hover:text-white transition-colors"
                 >
                     <CloseIcon className="w-4 h-4" />
                 </button>
             </div>
         )}
 
-        {/* Inner Input Field Container */}
-        <div className="relative flex flex-col p-1.5 bg-[#1E1E1E] rounded-[26px] border border-gray-700/50 group transition-all duration-300 shadow-xl">
+        <div className="relative flex flex-col p-1.5 bg-[#141414] rounded-[24px] border border-white/5 group shadow-2xl">
             <textarea
               ref={textareaRef}
               rows={1}
@@ -200,92 +161,68 @@ const ChatInput: React.FC<ChatInputProps> = ({
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder={placeholderText}
-              className="w-full px-4 py-3 bg-transparent text-gray-200 placeholder-gray-500 focus:outline-none resize-none max-h-40 overflow-y-auto text-base"
+              className="w-full px-4 py-3 bg-transparent text-gray-200 placeholder-gray-600 focus:outline-none resize-none max-h-40 overflow-y-auto text-base"
               disabled={isLoading}
             />
             
-            {/* Toolbar Row */}
             <div className="flex items-center justify-between mt-1 px-1 pb-1">
-              <div className="flex items-center gap-1">
-                  {/* Ellipsis/Controls Button */}
+              <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setIsControlsSheetOpen(true)}
-                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-gray-700/50 min-w-[40px] min-h-[40px] flex items-center justify-center"
-                    title="More controls"
+                    className="p-2 text-gray-500 hover:text-white transition-colors rounded-full hover:bg-white/5"
+                    title="Controls"
                   >
                     <CircleEllipsisIcon className="w-5 h-5" />
                   </button>
                   
-                  {/* Model Selector Button */}
+                  {/* Replaced CPU Icon with Model Name Button */}
                   <button
                     onClick={() => setIsModelSheetOpen(true)}
-                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-gray-700/50 min-w-[40px] min-h-[40px] flex items-center justify-center"
-                    title="Select Model"
+                    className="px-3 py-1.5 text-gray-500 hover:text-white transition-all rounded-full border border-white/5 hover:bg-white/5 flex items-center gap-2"
+                    title="Change Engine"
                   >
-                    <CpuIcon className="w-5 h-5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">{getModelDisplayName(model)}</span>
                   </button>
 
-                  {/* Prompt Enhancer */}
                   <button 
                     onClick={handleEnhancePrompt}
                     disabled={isEnhancing || !inputValue.trim()}
-                    className={`p-2 transition-colors rounded-full hover:bg-gray-700/50 disabled:opacity-50 disabled:cursor-not-allowed min-w-[40px] min-h-[40px] flex items-center justify-center ${isEnhanced ? 'text-yellow-400' : 'text-gray-400 hover:text-white'}`}
-                    title="Enhance Prompt"
+                    className={`p-2 transition-colors rounded-full hover:bg-white/5 disabled:opacity-50 ${isEnhanced ? 'text-yellow-400' : 'text-gray-500 hover:text-white'}`}
                   >
                       {isEnhancing ? (
-                        <SpinnerIcon className="w-5 h-5 animate-spin text-blue-400" />
+                        <SpinnerIcon className="w-5 h-5 animate-spin" />
                       ) : (
-                        <SparklesIcon className={`w-5 h-5 ${isEnhanced ? 'fill-yellow-400/20' : ''}`} />
+                        <SparklesIcon className="w-5 h-5" />
                       )}
                   </button>
               </div>
               
               <div className="flex items-center gap-2">
-                {/* Plus Button */}
-                <button 
-                     onClick={handlePlusClick} 
-                     className="p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-gray-700/50 disabled:opacity-50 disabled:cursor-not-allowed min-w-[40px] min-h-[40px] flex items-center justify-center"
-                    >
-                      <PlusIcon className="w-5 h-5" />
+                <button onClick={handlePlusClick} className="p-2 text-gray-500 hover:text-white transition-colors rounded-full hover:bg-white/5">
+                    <PlusIcon className="w-5 h-5" />
                 </button>
-                <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    accept="image/*, application/pdf, text/plain, text/csv, application/json, .js, .ts, .py, .html, .css, .md"
-                    onChange={handleFileSelect}
-                />
+                <input type="file" ref={fileInputRef} className="hidden" onChange={(e) => e.target.files?.[0] && onFileChange(e.target.files[0])} />
 
-                {/* Dynamic Voice/Send Button */}
                 <button
                     onClick={hasContent ? handleSend : onVoiceClick}
                     disabled={isLoading}
-                    className={`p-2.5 rounded-full transition-all duration-300 transform min-w-[42px] min-h-[42px] flex items-center justify-center
+                    className={`p-2.5 rounded-full transition-all duration-300
                         ${hasContent 
-                            ? 'bg-blue-600 text-white hover:bg-blue-500 hover:scale-105 shadow-[0_0_15px_rgba(37,99,235,0.4)]' 
-                            : 'bg-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-600'
-                        } disabled:bg-gray-800 disabled:cursor-not-allowed disabled:shadow-none`}
+                            ? 'bg-white text-black hover:scale-105' 
+                            : 'text-gray-500 hover:text-white'
+                        } disabled:opacity-50`}
                 >
-                    <div className="relative w-5 h-5">
-                         <div className={`absolute inset-0 transition-all duration-300 ${hasContent ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`}>
-                             <SendIcon className="w-5 h-5" />
-                         </div>
-                         <div className={`absolute inset-0 transition-all duration-300 ${!hasContent ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-50'}`}>
-                             <VoiceIcon className="w-5 h-5" />
-                         </div>
-                    </div>
+                    {hasContent ? <SendIcon className="w-5 h-5" /> : <VoiceIcon className="w-5 h-5" />}
                 </button>
               </div>
             </div>
         </div>
         
-        <p className="text-center text-[10px] text-gray-600 mt-3 font-sans opacity-70">
-          © 2025 Hezell.Inc
+        <p className="text-center text-[9px] text-gray-700 mt-4 font-sans tracking-[0.2em] uppercase opacity-50">
+          Neural Architecture by Hezell.Inc
         </p>
-
       </div>
 
-      {/* Controls Bottom Sheet */}
       <ControlsBottomSheet
         isOpen={isControlsSheetOpen}
         onClose={() => setIsControlsSheetOpen(false)}
@@ -302,7 +239,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
         onPersonaChange={onPersonaChange}
       />
       
-      {/* Model Bottom Sheet (NEW) */}
       <ModelBottomSheet
         isOpen={isModelSheetOpen}
         onClose={() => setIsModelSheetOpen(false)}

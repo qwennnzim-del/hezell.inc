@@ -70,7 +70,7 @@ const ImageLoadingPlaceholder: React.FC<{ aspectRatio: AspectRatio; statusText?:
             <div className="relative z-10 flex flex-col items-center justify-center text-center text-gray-400 px-4">
                 <SparklesIcon className="w-10 h-10 mb-3 text-blue-400 opacity-80 animate-[pulse-icon_3s_ease-in-out_infinite]" />
                 <p className="font-medium text-gray-300 animate-pulse">{statusText || 'Generating image...'}</p>
-                <p className="text-xs text-gray-500 mt-1">Using AgentPro Engine</p>
+                <p className="text-xs text-gray-500 mt-1">Using Hezell AI Engine</p>
             </div>
         </div>
     );
@@ -285,11 +285,11 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
     
     setIsTtsLoading(true);
     try {
-      // Updated to GEMINI_API_KEY
-      if (!process.env.GEMINI_API_KEY) {
+      // Fix: Use process.env.API_KEY as per guidelines
+      if (!process.env.API_KEY) {
         throw new Error("API Key not found.");
       }
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: message.text }] }],
@@ -297,7 +297,7 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
           responseModalities: [Modality.AUDIO],
           speechConfig: {
             voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: voice || 'Kore' }, // Use dynamic voice
+              prebuiltVoiceConfig: { voiceName: voice || 'Kore' },
             },
           },
         },
@@ -329,8 +329,9 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
     }
   };
 
+  // Fix: Access marked via window as any to resolve TypeScript error
   const finalAnswerHtml = (message.text && !message.imageUrl) 
-    ? (typeof window.marked?.parse === 'function' ? window.marked.parse(message.text) : `<p>${message.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`)
+    ? (typeof (window as any).marked?.parse === 'function' ? (window as any).marked.parse(message.text) : `<p>${message.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`)
     : '';
 
   // Extract grounding (sources)
@@ -355,18 +356,17 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
   }).filter(Boolean) || [];
 
   // Detect HTML for Artifact Preview
-  // Looking for blocks like ```html ... ```
   const extractedHtml = message.text.match(/```html([\s\S]*?)```/)?.[1];
   
   // Dynamic Bot Identity Name
   const getBotIdentity = (modelType?: ModelType) => {
       switch(modelType) {
           case 'gemini-3-pro-preview': return 'Hezell Pro 3.0';
-          case 'gemini-2.5-flash': return 'Hezell Flash 2.5';
-          case 'gemini-flash-lite-latest': return 'Hezell Lite 2.5';
-          case 'gemini-1.5-flash': return 'Hezell Flash 1.5';
+          case 'gemini-3-flash-preview': return 'Hezell Flash 3.0';
+          case 'gemini-flash-lite-latest': return 'Hezell Lite 2.0';
           case 'gemini-2.5-flash-image': return 'Hezell Image';
-          default: return 'Hezell';
+          case 'gemini-3-pro-image-preview': return 'Hezell Pro Image';
+          default: return 'Hezell AI';
       }
   };
 
@@ -375,8 +375,7 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
   return (
     <div className="flex gap-4 items-start my-6 relative animate-fade-in-up">
       <CusstzzLogo className="w-8 h-8 rounded-full flex-shrink-0 mt-2" />
-      <div className="w-full max-w-xl min-w-0"> {/* min-w-0 is key for text truncation flex child */}
-        {/* Updated Name Header with Status Text */}
+      <div className="w-full max-w-xl min-w-0">
         <div className="flex items-center gap-2 mb-1">
             <p className="font-medium text-gray-200">{botDisplayName}</p>
             {message.statusText && (
@@ -386,7 +385,6 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
             )}
         </div>
 
-        {/* CoT Thinking Box (Displayed if isThinkingMode is true OR thinkingText exists) */}
         {(message.isThinkingMode || message.thinkingText) && (
             <ThinkingDisclosure 
                 thinkingText={message.thinkingText || ''} 
@@ -412,7 +410,6 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
           />
         )}
         
-        {/* Artifact Preview Button */}
         {!message.isStreaming && extractedHtml && (
              <button
                 onClick={() => setShowArtifact(true)}
@@ -423,7 +420,6 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
              </button>
         )}
         
-        {/* Sources / Grounding Display */}
         {!message.isStreaming && sources.length > 0 && (
             <div className="mt-4 pt-3 border-t border-gray-800">
                 <p className="text-xs font-semibold text-gray-400 mb-2 flex items-center gap-1">
@@ -445,7 +441,6 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
             </div>
         )}
 
-        {/* Action Buttons */}
         {!message.isStreaming && (message.text || message.imageUrl) && (
             <div className="flex items-center gap-2 mt-3">
                 <ActionButton onClick={() => setIsLiked(!isLiked)}>
@@ -481,7 +476,6 @@ const FinalBotMessage: React.FC<FinalBotMessageProps> = ({ message, onStageImage
             </div>
         )}
         
-        {/* Suggestions Chips */}
         {!message.isStreaming && message.suggestions && message.suggestions.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2 animate-fade-in">
                 {message.suggestions.map((suggestion, idx) => (

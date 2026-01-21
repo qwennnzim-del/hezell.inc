@@ -27,7 +27,8 @@ function createBlob(data: Float32Array): Blob {
   const l = data.length;
   const int16 = new Int16Array(l);
   for (let i = 0; i < l; i++) {
-    int16[i] = data[i] < 0 ? data[i] * 32768 : data[i] * 32767;
+    // Fix: Always use 32768 for PCM conversion as per guidelines
+    int16[i] = data[i] * 32768;
   }
   return {
     data: encode(new Uint8Array(int16.buffer)),
@@ -56,29 +57,28 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
     
     const startListening = async () => {
       try {
-        // Updated to GEMINI_API_KEY
-        if (!process.env.GEMINI_API_KEY) {
+        // Fix: Use API_KEY exclusively from environment variable
+        if (!process.env.API_KEY) {
             throw new Error("API Key is not configured.");
         }
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
         mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
+        // Fix: Use the 12-2025 version of the native audio model
         const sessionPromise = ai.live.connect({
-            model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+            model: 'gemini-2.5-flash-native-audio-preview-12-2025',
             callbacks: {
                 onopen: () => {
                     audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
                     const source = audioContext.createMediaStreamSource(mediaStream!);
                     
-                    // Create Analyzer for Visualizer
                     analyser = audioContext.createAnalyser();
                     analyser.fftSize = 512;
                     analyser.smoothingTimeConstant = 0.8;
                     
                     scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
                     
-                    // Chain: Source -> Analyser -> ScriptProcessor -> Destination
                     source.connect(analyser);
                     analyser.connect(scriptProcessor);
                     scriptProcessor.connect(audioContext.destination);
@@ -87,6 +87,7 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
                         if (sessionClosed) return;
                         const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
                         const pcmBlob = createBlob(inputData);
+                        // Fix: Solely rely on sessionPromise resolves to send input
                         sessionPromise.then((session) => {
                           if (!sessionClosed) {
                             session.sendRealtimeInput({ media: pcmBlob });
@@ -94,7 +95,6 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
                         });
                     };
 
-                    // Start Visualizer Loop
                     visualize();
                 },
                 onmessage: (message: LiveServerMessage) => {
@@ -133,7 +133,6 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
       }
     };
     
-    // Holographic Visualizer Function
     const visualize = () => {
         if (!canvasRef.current || !analyser) return;
         const canvas = canvasRef.current;
@@ -143,7 +142,6 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
         
-        // Resize canvas to fit screen
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         const width = canvas.width;
@@ -157,25 +155,18 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
 
             ctx.clearRect(0, 0, width, height);
             
-            // Draw central glow
             const gradient = ctx.createRadialGradient(centerX, centerY, 50, centerX, centerY, 300);
-            gradient.addColorStop(0, "rgba(0, 198, 255, 0.2)"); // Cyan core
+            gradient.addColorStop(0, "rgba(0, 198, 255, 0.2)");
             gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, width, height);
 
-            // Draw Circular Waveform
             const radius = 100;
             const barWidth = (Math.PI * 2) / bufferLength;
             
-            ctx.beginPath();
             for (let i = 0; i < bufferLength; i++) {
-                const barHeight = dataArray[i] * 1.5; // Amplify height
+                const barHeight = dataArray[i] * 1.5;
                 const angle = i * barWidth;
-                
-                // Calculate dynamic color based on frequency
-                const hue = i / bufferLength * 360; 
-                // Mix between Cyan (190) and Purple (280)
                 const dynamicHue = 190 + (dataArray[i] / 255) * 90;
                 
                 const x = centerX + Math.cos(angle) * (radius + barHeight);
@@ -191,15 +182,12 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
                 ctx.stroke();
             }
             
-            // Draw Inner Core Ring
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius - 10, 0, 2 * Math.PI);
             ctx.strokeStyle = "rgba(0, 198, 255, 0.5)";
             ctx.lineWidth = 2;
             ctx.stroke();
             
-            // Draw Floating Particles
-            // (Simplified for performance, just random sparkles on loud noises)
             if (dataArray[10] > 150) {
                  ctx.fillStyle = "#FFF";
                  ctx.beginPath();
@@ -221,14 +209,11 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
         analyser?.disconnect();
         audioContext?.close().catch(console.error);
     };
-  }, [voice]); // Re-run when voice changes
+  }, [voice]);
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col font-sans overflow-hidden">
-      {/* Visualizer Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-      
-      {/* Header */}
       <header className="flex justify-between items-center p-6 text-white z-10">
         <div className="flex items-center gap-2">
             <div className="relative">
@@ -241,8 +226,6 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
           <HistoryIcon className="w-6 h-6" />
         </button>
       </header>
-      
-      {/* Transcription Display */}
       <main className="flex-grow flex items-center justify-center p-8 z-10 text-center">
         <div className="max-w-2xl bg-black/40 backdrop-blur-sm p-6 rounded-2xl border border-white/10 shadow-2xl">
             <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-purple-200 text-3xl font-medium leading-relaxed animate-fade-in">
@@ -256,8 +239,6 @@ const LiveVoiceView: React.FC<LiveVoiceViewProps> = ({ onClose, onSend, voice })
             </p>
         </div>
       </main>
-
-      {/* Controls */}
       <footer className="flex justify-center items-center p-6 gap-6 z-10">
           <div className="flex items-center gap-6 bg-gray-900/80 backdrop-blur-xl px-6 py-4 rounded-full border border-gray-700/50 shadow-[0_0_30px_rgba(0,198,255,0.15)]">
               <button className="text-white p-2 hover:bg-white/10 rounded-full transition-colors"><CameraIcon className="w-6 h-6" /></button>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Message } from '../types';
 import { CusstzzLogo } from './Icons';
@@ -9,9 +10,10 @@ interface ThinkingMessageProps {
 const ThinkingMessage: React.FC<ThinkingMessageProps> = ({ message }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
+  // Fix: Access marked via window as any to resolve TypeScript error
   // When streaming is done, parse the full text as Markdown.
-  const finalContentHtml = !message.isStreaming && typeof window.marked?.parse === 'function'
-      ? window.marked.parse(message.text)
+  const finalContentHtml = !message.isStreaming && typeof (window as any).marked?.parse === 'function'
+      ? (window as any).marked.parse(message.text)
       // Fallback for when marked is not available.
       : `<p>${message.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`;
 

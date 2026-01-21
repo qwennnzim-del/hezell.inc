@@ -12,62 +12,60 @@ interface ModelBottomSheetProps {
 
 const ModelBottomSheet: React.FC<ModelBottomSheetProps> = ({ isOpen, onClose, model, onModelChange }) => {
   const modelOptions: { id: ModelType; name: string; description: string; tag: string }[] = [
-    { id: 'gemini-2.5-flash', name: 'Hezell Flash 2.5', description: 'Cepat, cerdas, & stabil. Pilihan terbaik harian.', tag: 'RECOMMENDED' },
-    { id: 'gemini-flash-lite-latest', name: 'Hezell Lite 2.0', description: 'Paling ringan & hemat kuota. Respon instan.', tag: 'STABLE' },
-    { id: 'gemini-3-pro-preview', name: 'Hezell Pro 3.0', description: 'Logika tinggi. (Mungkin butuh akun berbayar/Limit).', tag: 'HIGH USAGE' },
-    { id: 'gemini-2.5-flash-image', name: 'Hezell Image', description: 'Membuat gambar AI. (Perlu Billing Aktif).', tag: 'PAID' },
+    { id: 'gemini-3-flash-preview', name: 'Hezell Neural Core (Flash)', description: 'Mesin utama Hezell yang seimbang, cerdas, dan instan.', tag: 'DEFAULT' },
+    { id: 'gemini-flash-lite-latest', name: 'Hezell Neural Core (Lite)', description: 'Versi ringan untuk efisiensi energi dan kecepatan maksimal.', tag: 'SPEED' },
+    { id: 'gemini-3-pro-preview', name: 'Hezell Neural Core (Ultra)', description: 'Logika tingkat tinggi untuk tugas kompleks dan analisis mendalam.', tag: 'UNLIMITED' },
+    { id: 'gemini-2.5-flash-image', name: 'Hezell Vision Engine', description: 'Laboratorium kreatif Hezell untuk merancang visual fotorealistik.', tag: 'CREATIVE' },
   ];
 
   return (
     <>
-      {/* Backdrop */}
       <div 
-        className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
         aria-hidden="true"
       ></div>
 
-      {/* Sheet */}
       <div 
-        className={`fixed bottom-0 left-0 right-0 z-[70] bg-[#121212] rounded-t-[30px] shadow-2xl transform transition-transform duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${isOpen ? 'translate-y-0' : 'translate-y-full'} max-h-[80vh] overflow-y-auto border-t border-gray-800`}
+        className={`fixed bottom-0 left-0 right-0 z-[70] bg-[#0A0A0A] rounded-t-[32px] shadow-2xl transform transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${isOpen ? 'translate-y-0' : 'translate-y-full'} max-h-[85vh] overflow-y-auto border-t border-white/10`}
       >
-        <div className="sticky top-0 bg-[#121212]/95 backdrop-blur-md z-10 p-4 border-b border-gray-800">
-            <div className="w-12 h-1.5 bg-gray-700 rounded-full mx-auto mb-4" />
-            <h2 className="text-lg font-bold text-center text-white tracking-wide">Pilih Neural Engine</h2>
-            <p className="text-xs text-center text-gray-400 mt-1">Pilih otak AI yang sesuai kebutuhan Anda</p>
+        <div className="sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-md z-10 p-6 border-b border-white/5">
+            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-6" />
+            <h2 className="text-xl font-black text-center text-white tracking-tight uppercase">Neural Architecture</h2>
+            <p className="text-[10px] text-center text-gray-500 mt-2 font-bold tracking-widest uppercase">Select an engine by Hezell.Inc</p>
         </div>
 
-        <div className="p-4 space-y-3 pb-8">
+        <div className="p-6 space-y-4 pb-12">
             {modelOptions.map((option) => (
                 <button
                     key={option.id}
                     onClick={() => { onModelChange(option.id); onClose(); }}
-                    className={`relative w-full text-left p-4 rounded-2xl border transition-all duration-200 group ${
+                    className={`relative w-full text-left p-5 rounded-2xl border transition-all duration-300 group ${
                         model === option.id 
-                        ? 'bg-gray-800 border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.15)]' 
-                        : 'bg-gray-900/40 border-gray-800 hover:bg-gray-800'
+                        ? 'bg-white/5 border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.05)]' 
+                        : 'bg-transparent border-white/5 hover:bg-white/[0.02] hover:border-white/10'
                     }`}
                 >
                     <div className="flex justify-between items-start">
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className={`text-base font-bold ${model === option.id ? 'text-white' : 'text-gray-300'}`}>
+                        <div className="pr-8">
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className={`text-base font-black tracking-tight ${model === option.id ? 'text-white' : 'text-gray-400'}`}>
                                     {option.name}
                                 </span>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                                    option.tag === 'HIGH USAGE' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
-                                    option.tag === 'STABLE' ? 'text-green-400 border-green-500/30 bg-green-500/10' :
-                                    option.tag === 'PAID' ? 'text-red-400 border-red-500/30 bg-red-500/10' :
-                                    'text-blue-400 border-blue-500/30 bg-blue-500/10'
+                                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${
+                                    option.tag === 'UNLIMITED' ? 'text-purple-400 border-purple-400/30' :
+                                    option.tag === 'SPEED' ? 'text-yellow-400 border-yellow-400/30' :
+                                    option.tag === 'CREATIVE' ? 'text-blue-400 border-blue-400/30' :
+                                    'text-white/40 border-white/10'
                                 }`}>
                                     {option.tag}
                                 </span>
                             </div>
-                            <p className="text-xs text-gray-500 leading-relaxed">{option.description}</p>
+                            <p className="text-xs text-gray-500 leading-relaxed font-light">{option.description}</p>
                         </div>
                         {model === option.id && (
-                            <div className="bg-blue-500 rounded-full p-1">
-                                <CheckIcon className="w-4 h-4 text-white" />
+                            <div className="bg-white text-black rounded-full p-1 shadow-lg">
+                                <CheckIcon className="w-3 h-3" />
                             </div>
                         )}
                     </div>
