@@ -1,3 +1,4 @@
+
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -10,8 +11,8 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // Updated to match the user's specific variable name
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      // Updated to match the strict GenAI requirement for API_KEY
+      'process.env.API_KEY': JSON.stringify(env.API_KEY)
     }
   }
 })

@@ -1,6 +1,6 @@
 
 export type AspectRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4';
-export type ModelType = 'gemini-2.5-flash' | 'gemini-3-pro-preview' | 'gemini-2.5-flash-image' | 'gemini-flash-lite-latest' | 'gemini-1.5-flash' | 'imagen-4.0-generate-001';
+export type ModelType = 'gemini-3-flash-preview' | 'gemini-3-pro-preview' | 'gemini-2.5-flash-image' | 'gemini-flash-lite-latest' | 'imagen-4.0-generate-001' | 'gemini-3-pro-image-preview';
 export type VoiceName = 'Kore' | 'Fenrir' | 'Puck' | 'Charon' | 'Aoede';
 export type AgentPersona = 'Default' | 'Architect' | 'Strategist' | 'Professor' | 'Ghost';
 

@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { SidebarIcon, NewChatIcon, ChevronDownIcon, CusstzzLogo } from './Icons';
-import { ModelType } from '../types';
+import { ModelType } from './types';
 
 interface HeaderProps {
   model: ModelType;
@@ -42,7 +43,8 @@ const Header: React.FC<HeaderProps> = ({ model, onModelChange, onToggleSidebar, 
   }
 
   const modelOptions: { id: ModelType; name: string; description: string }[] = [
-    { id: 'gemini-2.5-flash', name: 'CusstzzAI Flash', description: 'Model tercepat untuk tugas sehari-hari.' },
+    // Fix: Updated 'gemini-2.5-flash' to valid ModelType 'gemini-3-flash-preview'
+    { id: 'gemini-3-flash-preview', name: 'CusstzzAI Flash', description: 'Model tercepat untuk tugas sehari-hari.' },
     { id: 'gemini-3-pro-preview', name: 'CusstzzAI Pro 3.0', description: 'Reasoning canggih, Coding & Math.' },
     { id: 'imagen-4.0-generate-001', name: 'CusstzzAI Imagen', description: 'Buat gambar dari teks.' },
     { id: 'gemini-2.5-flash-image', name: 'CusstzzAI Edit', description: 'Unggah & edit gambar dengan AI.' },
