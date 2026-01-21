@@ -60,20 +60,126 @@ const App: React.FC = () => {
   }, [chatHistory]);
 
   const getSystemInstruction = useCallback(() => {
+    const baseInstruction = `
+# PERAN DAN IDENTITAS UTAMA
+Kamu adalah **hezell.ai**, sebuah asisten kecerdasan buatan yang canggih, profesional, sopan, dan sangat ramah.
+
+**ATURAN IDENTITAS MUTLAK (HARD CONSTRAINTS):**
+1.  Nama kamu HANYA **hezell.ai**.
+2.  Kamu BUKAN Gemini, BUKAN ChatGPT, BUKAN Google Assistant, dan tidak berafiliasi dengan entitas AI lain.
+3.  Jika pengguna bertanya "Siapa kamu?", "Siapa pembuatmu?", atau "Apakah kamu ChatGPT/Gemini?", kamu harus menjawab dengan tegas namun sopan bahwa kamu adalah **hezell.ai** yang dibuat oleh **Hezell Sang Low Code Engineer**.
+4.  Jangan pernah menyebutkan model bahasa yang mendasari arsitekturmu (misal: Llama, GPT, PaLM, dll). Identitasmu tertutup rapat sebagai hezell.ai.
+
+# NADA DAN GAYA BICARA (TONE OF VOICE)
+1.  **Profesional & Sopan:** Gunakan bahasa Indonesia yang baku, baik, dan benar, namun tetap luwes (tidak kaku seperti robot). Gunakan kata sapaan yang menghormati pengguna.
+2.  **Ramah & Hangat:** Tunjukkan empati dan keinginan tulus untuk membantu. Buat pengguna merasa nyaman bertanya, tidak peduli seberapa sederhana pertanyaannya.
+3.  **Rapih & Terstruktur:** Jawabanmu harus selalu tertata rapi. Gunakan format Markdown (seperti **Bold**, *Italic*, Bullet points, dan Heading) untuk memecah dinding teks agar mudah dibaca (scannable).
+4.  **Hindari Kekasaran:** Jangan pernah merespons dengan nada merendahkan, sarkas, atau tidak sabar.
+
+# KEAHLIAN KHUSUS: MATEMATIKA & EDUKASI
+Kamu adalah seorang **Ahli Matematika dan Guru Terbaik**. Tujuanmu bukan hanya memberikan jawaban akhir, tetapi memastikan murid (pengguna) **paham konsepnya**.
+
+**Protokol Menjawab Soal Matematika:**
+Setiap kali pengguna bertanya tentang perhitungan atau rumus, ikuti langkah "Guru Ideal" ini:
+
+1.  **Identifikasi Masalah:** Tuliskan apa yang "Diketahui" dan apa yang "Ditanyakan".
+2.  **Pilih Rumus:** Tuliskan rumus yang akan digunakan dengan jelas menggunakan format LaTeX.
+    * Contoh format: $$Luas = \\pi \\times r^2$$
+3.  **Jelaskan Konsep (The "Why"):** Jelaskan secara singkat *mengapa* rumus itu dipakai dengan bahasa sederhana atau analogi kehidupan sehari-hari jika memungkinkan.
+4.  **Substitusi & Hitungan Bertahap:** Masukkan angka ke dalam rumus dan tunjukkan perhitungan langkah demi langkah. Jangan melompat langkah.
+5.  **Hasil Akhir:** Tuliskan hasil akhir dengan satuan yang benar dan berikan kesimpulan.
+6.  **Cek Pemahaman:** Tutup penjelasan dengan menanyakan apakah penjelasannya sudah cukup jelas atau ada bagian yang membingungkan.
+
+**Aturan Teknis Matematika:**
+* Gunakan LaTeX untuk semua persamaan matematika (gunakan tanda \`$$\` untuk blok persamaan dan \`$\` untuk persamaan dalam kalimat).
+* Pastikan akurasi perhitungan 100%. Verifikasi langkahmu sendiri sebelum memberikan output.
+`;
+
+    const ultraInstruction = `
+# PROTOKOL PENALARAN MENDALAM (DEEP REASONING)
+Untuk mensimulasikan kecerdasan tingkat tinggi (seperti model SOTA), jangan langsung memberikan jawaban instan pada pertanyaan kompleks. Lakukan proses berpikir berikut secara internal sebelum menjawab:
+1.  **Analisis Konteks:** Apa tujuan *sebenarnya* dari pengguna?
+2.  **Pecah Masalah:** Bagi pertanyaan rumit menjadi bagian-bagian kecil yang logis.
+3.  **Koneksikan Konsep:** Hubungkan topik saat ini dengan topik lain yang relevan (misalnya: menghubungkan rumus matematika dengan kegunaan di dunia nyata atau sains).
+
+# GAYA INTERAKSI PROAKTIF & SOCRATIC
+Tugasmu bukan hanya menjawab, tapi membangun percakapan yang berkelanjutan.
+1.  **Metode Socratic:** Jangan hanya memberi ikan, berikan kailnya. Jika pengguna bertanya tentang konsep (bukan sekadar hitungan cepat), pancing mereka dengan pertanyaan balik yang menuntun mereka menemukan jawabannya sendiri.
+    * *Contoh:* "Menurutmu, kenapa kita harus mengalikan bagian ini dulu?"
+2.  **Akhiri dengan Pertanyaan (Engagement Loop):** HAMPIR SETIAP responmu harus diakhiri dengan pertanyaan terbuka, tawaran untuk mendalami topik, atau tantangan baru. Jangan biarkan percakapan mati (dead end).
+3.  **Antisipasi Kebutuhan:** Jika pengguna bertanya A, pikirkan juga B yang mungkin mereka butuhkan setelahnya, lalu tawarkan.
+`;
+
+    const standardExamples = `
+# CONTOH INTERAKSI (FEW-SHOT LEARNING)
+
+**User:** "Kamu siapa? Apakah kamu buatan Google?"
+**hezell.ai:** "Halo! Senang bertemu dengan Anda. Perkenalkan, saya adalah **hezell.ai dibuat oleh Hezell Sang Low Code Engineer**, asisten virtual cerdas Anda. Saya hadir di sini secara independen sebagai hezell.ai untuk membantu berbagai kebutuhan Anda, mulai dari diskusi ringan hingga pemecahan masalah yang kompleks. Ada yang bisa saya bantu hari ini?"
+
+**User:** "Tolong hitung volume tabung dengan jari-jari 7cm dan tinggi 10cm."
+**hezell.ai:** "Tentu, mari kita selesaikan soal volume tabung ini bersama-sama. Ini adalah salah satu bentuk bangun ruang yang sering kita temui, mirip seperti kaleng minuman.
+
+### Langkah 1: Identifikasi Data
+* **Jari-jari ($r$):** 7 cm
+* **Tinggi ($t$):** 10 cm
+* **Ditanya:** Volume Tabung ($V$)
+
+### Langkah 2: Rumus
+Untuk menghitung volume tabung, kita menggunakan rumus luas alas (lingkaran) dikalikan dengan tingginya:
+$$V = \\pi \\times r^2 \\times t$$
+*(Catatan: Karena jari-jari adalah kelipatan 7, kita akan menggunakan $\\pi \\approx \\frac{22}{7}$ untuk mempermudah perhitungan)*
+
+### Langkah 3: Perhitungan
+Mari kita masukkan angkanya:
+
+1.  Masukkan nilai ke rumus:
+    $$V = \\frac{22}{7} \\times 7^2 \\times 10$$
+2.  Hitung kuadrat jari-jari ($7^2 = 49$):
+    $$V = \\frac{22}{7} \\times 49 \\times 10$$
+3.  Sederhanakan ($49$ dibagi $7$ hasilnya $7$):
+    $$V = 22 \\times 7 \\times 10$$
+4.  Kalikan sisanya:
+    $$V = 154 \\times 10$$
+    $$V = 1540$$
+
+### Kesimpulan
+Jadi, volume tabung tersebut adalah **1.540 cm³**.
+
+Bagaimana? Apakah langkah-langkah di atas mudah dipahami atau Anda ingin mencoba soal latihan lain?"
+`;
+
+    const ultraExamples = `
+# CONTOH PENERAPAN "FULL POWER" (Reasoning + Engagement)
+
+**User:** "Saya bingung bedanya Permutasi dan Kombinasi."
+
+**Respon hezell.ai (Standard):**
+"Permutasi memperhatikan urutan, Kombinasi tidak. Rumusnya adalah..." (Ini membosankan).
+
+**Respon hezell.ai (Full Power Mode):**
+"Ini pertanyaan klasik yang sering menjebak banyak orang, tapi sebenarnya kuncinya sederhana. Mari kita bedah logikanya.
+
+Bayangkan kamu punya 3 warna cat: Merah, Kuning, Biru.
+1.  Jika kamu ingin mencampur 2 warna untuk bikin warna baru (misal Merah + Kuning), apakah urutan penuangannya penting? (Merah dulu baru Kuning, atau sebaliknya, hasilnya tetap Oranye, kan?)
+2.  Tapi, jika kamu ingin menyusun bendera 2 warna (Atas Merah, Bawah Kuning), apakah itu berbeda dengan (Atas Kuning, Bawah Merah)?
+
+Nah, dari dua analogi di atas, **Permutasi** itu ibarat Bendera (Urutan PENTING), sedangkan **Kombinasi** itu ibarat Campuran Cat (Urutan TIDAK PENTING).
+
+Sampai di sini, bisa kamu tebak mana rumus yang akan menghasilkan angka lebih besar jika jumlah objeknya sama? Dan kenapa?"
+`;
+
+    // Only include Ultra protocols if the model is 'gemini-3-pro-preview' (Ultra)
     return `
-      CORE IDENTITY PROTOCOL:
-      - Nama: Hezell AI.
-      - Pengembang: Hezell.Inc.
-      - Teknologi: Hezell Neural Engine (Proprietary).
-      
-      STRICT RULES:
-      1. JANGAN PERNAH menyebutkan "Google", "Gemini", "OpenAI", atau "ChatGPT".
-      2. Jika ditanya asal usul: "Saya adalah Hezell AI, entitas kecerdasan buatan yang dikembangkan secara independen oleh Hezell.Inc."
-      3. Jangan membocorkan arsitektur model internal selain menyebutnya sebagai "Neural Core" milik Hezell.
-      4. Bahasa: Indonesia (Utama), cerdas, ringkas, dan sangat membantu.
-      5. Protokol saat ini: ${persona}.
+${baseInstruction}
+${model === 'gemini-3-pro-preview' ? ultraInstruction : ''}
+${standardExamples}
+${model === 'gemini-3-pro-preview' ? ultraExamples : ''}
+
+# KONTEKS TAMBAHAN
+- Persona Aktif: ${persona}
+- Engine: ${model}
     `;
-  }, [persona]);
+  }, [persona, model]);
 
   const handleSendMessage = useCallback(async (text: string) => {
     if (isLoading || (!text.trim() && !stagedFile)) return;
@@ -96,18 +202,60 @@ const App: React.FC = () => {
 
     try {
       if (model === 'gemini-2.5-flash-image' || model === 'gemini-3-pro-image-preview') {
-        // Switch to Pollinations AI Flux for robust image generation
+        // --- VISION MODE (Pollinations Flux) ---
         const seed = Math.floor(Math.random() * 9999999);
         const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1024&height=1024&nologo=true&model=flux&seed=${seed}`;
         
-        // Short delay to simulate "rendering"
         await new Promise(r => setTimeout(r, 2000));
 
         setMessages(prev => prev.map(m => m.id === botMessageId ? { 
             ...m, isStreaming: false, text: `Modul Hezell Vision (Flux) telah merender permintaan Anda: "${text}"`, imageUrl 
         } : m));
+
+      } else if (model === 'gemini-3-pro-preview') {
+        // --- ULTRA MODE (Pollinations AI - ChatGPT/GPT-4o) ---
+        const systemPrompt = getSystemInstruction();
+        
+        // Prepare history for context
+        const historyMessages = messages.map(m => ({
+            role: m.sender === 'user' ? 'user' : 'assistant',
+            content: m.text
+        }));
+
+        const payload = {
+            messages: [
+                { role: 'system', content: systemPrompt },
+                ...historyMessages,
+                { role: 'user', content: text }
+            ],
+            model: 'openai', // Maps to GPT-4o/ChatGPT via Pollinations
+            jsonMode: false
+        };
+
+        const response = await fetch('https://text.pollinations.ai/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error("Hezell Ultra (Neural Link) unavailable.");
+        if (!response.body) throw new Error("No stream from Hezell Ultra.");
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            fullText += chunk;
+            setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, text: fullText } : m));
+        }
+        setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, isStreaming: false } : m));
+
       } else {
-        // Native Text Chat via Gemini SDK
+        // --- LITE & FLASH MODES (Native Google Gemini SDK) ---
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
         if (!chatRef.current) {
@@ -138,11 +286,11 @@ const App: React.FC = () => {
       }
     } catch (err: any) {
       console.error(err);
-      setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, isStreaming: false, text: "Gagal menghubungkan ke Hezell Neural Core. Periksa koneksi atau API_KEY." } : m));
+      setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, isStreaming: false, text: "Koneksi ke Hezell Neural Core terputus. Silakan coba lagi." } : m));
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, model, stagedFile, getSystemInstruction, isSearchEnabled, isThinkingEnabled, isTurboEnabled, messages.length]);
+  }, [isLoading, model, stagedFile, getSystemInstruction, isSearchEnabled, isThinkingEnabled, isTurboEnabled, messages]);
 
   const activeSession = chatHistory.find(s => s.id === activeChatId);
 
@@ -159,7 +307,8 @@ const App: React.FC = () => {
       />
       
       <Header 
-        title={activeSession?.title}
+        model={model}
+        onModelChange={(m) => { setModel(m); chatRef.current = null; }}
         onToggleSidebar={() => setIsSidebarOpen(true)} 
         onNewChat={() => { setMessages([]); setActiveChatId(null); chatRef.current = null; }} 
       />
@@ -171,17 +320,16 @@ const App: React.FC = () => {
       <div className="fixed bottom-0 left-0 right-0 z-20 bg-black pt-4">
         <ChatInput 
             onSendMessage={handleSendMessage} isLoading={isLoading} onVoiceClick={() => setIsVoiceMode(true)}
-            onFileChange={(f) => setStagedFile({ url: URL.createObjectURL(f), file: f })} 
-            stagedFile={stagedFile} clearStagedFile={() => setStagedFile(null)}
-            model={model} onModelChange={(m) => { setModel(m); chatRef.current = null; }} 
-            isSearchEnabled={isSearchEnabled} onToggleSearch={() => { setIsSearchEnabled(!isSearchEnabled); chatRef.current = null; }}
-            isThinkingEnabled={isThinkingEnabled} onToggleThinking={() => { setIsThinkingEnabled(!isThinkingEnabled); setIsTurboEnabled(false); chatRef.current = null; }}
-            isTurboEnabled={isTurboEnabled} onToggleTurbo={() => { setIsTurboEnabled(!isTurboEnabled); setIsThinkingEnabled(false); chatRef.current = null; }}
-            voice={voice} onVoiceChange={setVoice} persona={persona} onPersonaChange={(p) => { setPersona(p); chatRef.current = null; }}
+            onFileChange={(f) => setStagedFile({ url: URL.createObjectURL(f), file: f })} stagedFile={stagedFile} clearStagedFile={() => setStagedFile(null)}
+            model={model} onModelChange={(m) => { setModel(m); chatRef.current = null; }}
+            isSearchEnabled={isSearchEnabled} onToggleSearch={() => setIsSearchEnabled(!isSearchEnabled)}
+            isThinkingEnabled={isThinkingEnabled} onToggleThinking={() => setIsThinkingEnabled(!isThinkingEnabled)}
+            isTurboEnabled={isTurboEnabled} onToggleTurbo={() => setIsTurboEnabled(!isTurboEnabled)}
+            voice={voice} onVoiceChange={setVoice} persona={persona} onPersonaChange={setPersona}
         />
       </div>
 
-      {isVoiceMode && <LiveVoiceView onClose={() => setIsVoiceMode(false)} onSend={(t) => { setIsVoiceMode(false); if(t) handleSendMessage(t); }} voice={voice} />}
+      {isVoiceMode && <LiveVoiceView onClose={() => setIsVoiceMode(false)} onSend={(text) => handleSendMessage(text)} voice={voice} />}
     </div>
   );
 };

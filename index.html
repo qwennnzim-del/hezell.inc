@@ -7,24 +7,24 @@
     
     <!-- SEO & Identity -->
     <title>Hezell.Space - The Future of Intelligence</title>
-    <meta name="description" content="Hezell is an advanced AI assistant powered by Gemini Pro & Flash. Experience instant reasoning, image generation, and live artifacts." />
+    <meta name="description" content="Hezell is an advanced AI assistant powered by Hezell Neural Engine. Experience instant reasoning and creative visual rendering." />
     <meta name="author" content="Hezell.Inc" />
     <meta name="theme-color" content="#000000" />
     
     <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Hezell.Space - Next Gen AI Assistant" />
-    <meta property="og:description" content="Chat with Hezell. Featuring CoT Reasoning, 8K Image Generation, and Live Code Artifacts." />
-    <meta property="og:image" content="https://img.icons8.com/?size=512&id=iN4oY7OgknqM&format=png&color=FFFFFF" />
+    <meta property="og:description" content="Chat with Hezell. Featuring Hezell Neural Core & Hezell Vision Engine." />
+    <meta property="og:image" content="/LogoAplikasi/logo-app.png" />
     <meta property="og:url" content="https://hezell.space" />
     
     <!-- PWA & Mobile -->
     <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="https://img.icons8.com/?size=180&id=iN4oY7OgknqM&format=png&color=000000" />
+    <link rel="apple-touch-icon" href="/LogoAplikasi/logo-app.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=iN4oY7OgknqM&format=png&color=FFFFFF" />
+    <link rel="icon" type="image/png" href="/LogoAplikasi/logo-app.png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
@@ -64,17 +64,15 @@
       .loader-logo {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, #5ce1ff, #d480ff);
-        mask-image: url('https://img.icons8.com/?size=100&id=iN4oY7OgknqM&format=png&color=000000');
-        -webkit-mask-image: url('https://img.icons8.com/?size=100&id=iN4oY7OgknqM&format=png&color=000000');
-        mask-size: contain;
-        mask-repeat: no-repeat;
-        mask-position: center;
+        background-image: url('/LogoAplikasi/logo-app.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
         animation: pulse-loader 2s infinite;
       }
       @keyframes pulse-loader {
         0% { transform: scale(0.95); opacity: 0.8; }
-        50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 10px rgba(212,128,255,0.5)); }
+        50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 20px rgba(255,255,255,0.4)); }
         100% { transform: scale(0.95); opacity: 0.8; }
       }
       
@@ -132,7 +130,7 @@
   <body class="bg-black">
     <div id="initial-loader">
       <div class="loader-logo"></div>
-      <p style="color: #4b5563; margin-top: 1rem; font-family: 'Open Sans', sans-serif; font-size: 0.875rem;">Hezell AI</p>
+      <p style="color: #4b5563; margin-top: 1.5rem; font-family: 'Open Sans', sans-serif; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.3em; text-transform: uppercase;">Hezell Neural Core</p>
     </div>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
