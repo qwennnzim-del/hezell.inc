@@ -12,9 +12,9 @@ interface ModelBottomSheetProps {
 
 const ModelBottomSheet: React.FC<ModelBottomSheetProps> = ({ isOpen, onClose, model, onModelChange }) => {
   const modelOptions: { id: ModelType; name: string; description: string; tag: string }[] = [
-    { id: 'gemini-3-flash-preview', name: 'Hezell Neural Core (Flash)', description: 'Mesin utama Hezell yang seimbang, cerdas, dan instan.', tag: 'DEFAULT' },
+    { id: 'gemini-3-flash-preview', name: 'Hezell Neural Core (Flash)', description: 'Mesin utama Hezell yang seimbang, cerdas, dan instan (Gemini).', tag: 'DEFAULT' },
     { id: 'gemini-flash-lite-latest', name: 'Hezell Neural Core (Lite)', description: 'Versi ringan untuk efisiensi energi dan kecepatan maksimal.', tag: 'SPEED' },
-    { id: 'gemini-3-pro-preview', name: 'Hezell Neural Core (Ultra)', description: 'Logika tingkat tinggi untuk tugas kompleks dan analisis mendalam.', tag: 'UNLIMITED' },
+    { id: 'gemini-3-pro-preview', name: 'Hezell Neural Core (Ultra)', description: 'Integrasi OpenAI (GPT-4o) via Pollinations untuk penalaran superior.', tag: 'UNLIMITED' },
     { id: 'gemini-2.5-flash-image', name: 'Hezell Vision Engine (Flux)', description: 'Model fotorealistik Flux dari HuggingFace untuk desain visual presisi.', tag: 'CREATIVE' },
   ];
 

@@ -144,14 +144,15 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     <CircleEllipsisIcon className="w-5 h-5" />
                   </button>
                   
-                  {/* Model Name Label Selector */}
+                  {/* Model Selector as a Name Badge (The "Chip") */}
                   <button 
                     onClick={() => setIsModelSheetOpen(true)} 
-                    className="px-3 py-1.5 text-gray-400 hover:text-white transition-all rounded-full border border-white/10 hover:bg-white/5 flex items-center gap-2 group"
+                    className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all rounded-full border border-white/10 flex items-center gap-2 group shadow-sm"
                   >
-                    <span className="text-[10px] font-black tracking-widest uppercase group-hover:tracking-[0.15em] transition-all">
+                    <span className="text-[10px] font-black tracking-widest uppercase group-hover:tracking-[0.12em] transition-all">
                         {getModelDisplayName(model)}
                     </span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]"></div>
                   </button>
 
                   <button onClick={handleEnhancePrompt} disabled={isEnhancing || !inputValue.trim()} className={`p-2 transition-colors rounded-full hover:bg-white/5 ${isEnhanced ? 'text-blue-400' : 'text-gray-500 hover:text-white'}`}>

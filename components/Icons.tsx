@@ -6,20 +6,17 @@ type IconProps = {
 };
 
 export const CusstzzLogo: React.FC<IconProps> = ({ className }) => (
-  <div
-    className={`${className} bg-white brightness-100`}
-    style={{
-      maskImage: "url('https://img.icons8.com/?size=100&id=iN4oY7OgknqM&format=png&color=000000')",
-      WebkitMaskImage: "url('https://img.icons8.com/?size=100&id=iN4oY7OgknqM&format=png&color=000000')",
-      maskSize: 'contain',
-      WebkitMaskSize: 'contain',
-      maskRepeat: 'no-repeat',
-      WebkitMaskRepeat: 'no-repeat',
-      maskPosition: 'center',
-      WebkitMaskPosition: 'center',
+  <img 
+    src="/LogoAplikasi/logo-app.png" 
+    className={className} 
+    alt="Hezell AI Logo"
+    style={{ objectFit: 'contain' }}
+    onError={(e) => {
+      // Fallback styling in case image is not yet uploaded
+      e.currentTarget.style.display = 'none';
+      // You could optionally render a fallback SVG here via state if needed, 
+      // but hiding it prevents broken image icons.
     }}
-    role="img"
-    aria-label="Hezell Logo"
   />
 );
 
@@ -101,7 +98,7 @@ export const ShareIcon: React.FC<IconProps> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M15 3h6v6"/>
       <path d="M10 14 21 3"/>
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h6"/>
     </svg>
 );
 
